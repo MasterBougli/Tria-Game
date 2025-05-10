@@ -16,7 +16,31 @@ void UCharacterStatsComponent::BeginPlay()
 void UCharacterStatsComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+    
+    // Mise à jour des modificateurs
     UpdateModifiers(DeltaTime);
+
+    // Régénération automatique des stats
+    // Régénération de la vie
+    if (BaseStats.Health < BaseStats.MaxHealth)
+    {
+        float HealthRegen = BaseStats.HealthRegenRate * DeltaTime;
+        ModifyStat("Health", HealthRegen);
+    }
+
+    // Régénération de la stamina
+    if (BaseStats.Stamina < BaseStats.MaxStamina)
+    {
+        float StaminaRegen = BaseStats.StaminaRegenRate * DeltaTime;
+        ModifyStat("Stamina", StaminaRegen);
+    }
+
+    // Régénération du mana
+    if (BaseStats.Mana < BaseStats.MaxMana)
+    {
+        float ManaRegen = BaseStats.ManaRegenRate * DeltaTime;
+        ModifyStat("Mana", ManaRegen);
+    }
 }
 
 float UCharacterStatsComponent::GetStat(FName StatName) const
@@ -32,6 +56,9 @@ float UCharacterStatsComponent::GetStat(FName StatName) const
     if (StatName == "Magic") return BaseStats.Magic;
     if (StatName == "MagicDefense") return BaseStats.MagicDefense;
     if (StatName == "Speed") return BaseStats.Speed;
+    if (StatName == "HealthRegenRate") return BaseStats.HealthRegenRate;
+    if (StatName == "StaminaRegenRate") return BaseStats.StaminaRegenRate;
+    if (StatName == "ManaRegenRate") return BaseStats.ManaRegenRate;
     return 0.0f;
 }
 
@@ -48,7 +75,68 @@ void UCharacterStatsComponent::ModifyStat(FName StatName, float Value)
         BaseStats.Health = FMath::Min(BaseStats.Health, BaseStats.MaxHealth);
         OnStatChanged.Broadcast(StatName, BaseStats.MaxHealth);
     }
-    // ... autres stats similaires
+    else if (StatName == "Stamina")
+    {
+        BaseStats.Stamina = FMath::Clamp(BaseStats.Stamina + Value, 0.0f, BaseStats.MaxStamina);
+        OnStatChanged.Broadcast(StatName, BaseStats.Stamina);
+    }
+    else if (StatName == "MaxStamina")
+    {
+        BaseStats.MaxStamina = FMath::Max(0.0f, BaseStats.MaxStamina + Value);
+        BaseStats.Stamina = FMath::Min(BaseStats.Stamina, BaseStats.MaxStamina);
+        OnStatChanged.Broadcast(StatName, BaseStats.MaxStamina);
+    }
+    else if (StatName == "Mana")
+    {
+        BaseStats.Mana = FMath::Clamp(BaseStats.Mana + Value, 0.0f, BaseStats.MaxMana);
+        OnStatChanged.Broadcast(StatName, BaseStats.Mana);
+    }
+    else if (StatName == "MaxMana")
+    {
+        BaseStats.MaxMana = FMath::Max(0.0f, BaseStats.MaxMana + Value);
+        BaseStats.Mana = FMath::Min(BaseStats.Mana, BaseStats.MaxMana);
+        OnStatChanged.Broadcast(StatName, BaseStats.MaxMana);
+    }
+    else if (StatName == "Attack")
+    {
+        BaseStats.Attack = FMath::Max(0.0f, BaseStats.Attack + Value);
+        OnStatChanged.Broadcast(StatName, BaseStats.Attack);
+    }
+    else if (StatName == "Defense")
+    {
+        BaseStats.Defense = FMath::Max(0.0f, BaseStats.Defense + Value);
+        OnStatChanged.Broadcast(StatName, BaseStats.Defense);
+    }
+    else if (StatName == "Magic")
+    {
+        BaseStats.Magic = FMath::Max(0.0f, BaseStats.Magic + Value);
+        OnStatChanged.Broadcast(StatName, BaseStats.Magic);
+    }
+    else if (StatName == "MagicDefense")
+    {
+        BaseStats.MagicDefense = FMath::Max(0.0f, BaseStats.MagicDefense + Value);
+        OnStatChanged.Broadcast(StatName, BaseStats.MagicDefense);
+    }
+    else if (StatName == "Speed")
+    {
+        BaseStats.Speed = FMath::Max(0.0f, BaseStats.Speed + Value);
+        OnStatChanged.Broadcast(StatName, BaseStats.Speed);
+    }
+    else if (StatName == "HealthRegenRate")
+    {
+        BaseStats.HealthRegenRate = FMath::Max(0.0f, BaseStats.HealthRegenRate + Value);
+        OnStatChanged.Broadcast(StatName, BaseStats.HealthRegenRate);
+    }
+    else if (StatName == "StaminaRegenRate")
+    {
+        BaseStats.StaminaRegenRate = FMath::Max(0.0f, BaseStats.StaminaRegenRate + Value);
+        OnStatChanged.Broadcast(StatName, BaseStats.StaminaRegenRate);
+    }
+    else if (StatName == "ManaRegenRate")
+    {
+        BaseStats.ManaRegenRate = FMath::Max(0.0f, BaseStats.ManaRegenRate + Value);
+        OnStatChanged.Broadcast(StatName, BaseStats.ManaRegenRate);
+    }
 }
 
 void UCharacterStatsComponent::AddStatModifier(const FStatModifier& Modifier)
@@ -208,5 +296,11 @@ void UCharacterStatsComponent::ResetStats()
     BaseStats.Speed = 100.0f;
     BaseStats.Experience = 0.0f;
     BaseStats.ExperienceToNextLevel = 100.0f;
+    
+    // Valeurs de base pour les régénérations
+    BaseStats.HealthRegenRate = 1.0f;    // 1 point de vie par seconde
+    BaseStats.StaminaRegenRate = 5.0f;   // 5 points de stamina par seconde
+    BaseStats.ManaRegenRate = 2.0f;      // 2 points de mana par seconde
+    
     CalculateFinalStats();
 } 

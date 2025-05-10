@@ -155,15 +155,19 @@ void UInventoryComponent::UseConsumable(FName ItemID)
             UCharacterStatsComponent* StatsComp = Owner->FindComponentByClass<UCharacterStatsComponent>();
             if (StatsComp)
             {
-                // Créer le modificateur de stats
-                FStatModifier Modifier;
-                Modifier.StatName = Data.ConsumableEffectID;
-                Modifier.Value = Data.Value;
-                Modifier.Duration = Data.Duration;
-                Modifier.IsPermanent = false;
+                // Appliquer tous les effets du consommable
+                for (const FName& EffectID : Data.ConsumableEffectIDs)
+                {
+                    // Créer le modificateur de stats pour chaque effet
+                    FStatModifier Modifier;
+                    Modifier.StatName = EffectID;
+                    Modifier.Value = Data.Value;
+                    Modifier.Duration = Data.Duration;
+                    Modifier.IsPermanent = false;
 
-                // Appliquer l'effet
-                StatsComp->AddStatModifier(Modifier);
+                    // Appliquer l'effet
+                    StatsComp->AddStatModifier(Modifier);
+                }
             }
         }
     }

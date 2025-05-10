@@ -16,6 +16,24 @@ enum class EItemType : uint8
     Misc       UMETA(DisplayName = "Divers")
 };
 
+UCLASS()
+class TRIA_API UItemDataHelper : public UObject
+{
+    GENERATED_BODY()
+
+public:
+    UFUNCTION(CallInEditor, Category="Item")
+    static TArray<FName> GetAllItemIDs(const UObject* Context)
+    {
+        TArray<FName> IDs;
+        if (const UDataTable* DataTable = Cast<UDataTable>(Context->GetOuter()))
+        {
+            IDs = DataTable->GetRowNames();
+        }
+        return IDs;
+    }
+};
+
 USTRUCT(BlueprintType)
 struct FItemData : public FTableRowBase
 {
@@ -59,9 +77,9 @@ struct FItemData : public FTableRowBase
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TMap<FName, USkeletalMesh*> ArmorMeshes;
 
-    // Pour les consommables : ID de l'effet associé
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FName ConsumableEffectID;
+    // Pour les consommables : liste des IDs des effets associés
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(GetOptions="GetAllEffectIDs"))
+    TArray<FName> ConsumableEffectIDs;
 
     // Pour les équipements : slots compatibles
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -82,4 +100,8 @@ struct FItemData : public FTableRowBase
     // Pour les consommables : durée de l'effet
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float Duration;
+
+    // Liste des composants/matériaux de l'objet
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TArray<FName> Components;
 }; 
